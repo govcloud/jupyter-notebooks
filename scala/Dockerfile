@@ -1,0 +1,67 @@
+
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+FROM jupyter/minimal-notebook:2bfbb7d17524
+LABEL maintainer="William Hearn <william.hearn@canada.ca>"
+LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
+
+ENV JUPYTER_SCALA_VERSION="0.4.2"
+ENV SBT_VERSION="1.1.6"
+
+USER root
+
+RUN \
+  apt-get update \
+  && apt-get install -y software-properties-common \
+                        python-software-properties \
+                        curl \
+                        openjdk-8-jdk \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME /usr/lib/jvm/openjdk-8
+ENV PATH=${PATH}:${JAVA_HOME}/bin
+
+RUN curl -sL --retry 5 "https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.tgz" \
+  | gunzip \
+  | tar -x -C "/tmp/" \
+  && mv "/tmp/sbt" "/opt/sbt-${SBT_VERSION}" \
+  && chmod +x "/opt/sbt-${SBT_VERSION}/bin/sbt"
+
+ENV PATH=${PATH}:/opt/sbt-${SBT_VERSION}/bin/
+
+USER $NB_USER
+
+RUN curl -sL --retry 5 "https://github.com/jupyter-scala/jupyter-scala/archive/v${JUPYTER_SCALA_VERSION}.tar.gz" \
+  | gunzip \
+  | tar -x -C "/tmp/"
+
+RUN cd "/tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}" && \
+  /opt/sbt-${SBT_VERSION}/bin/sbt ++2.11.11 ++2.12.2 publishLocal \
+  && cd /tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}/ \
+  && ./jupyter-scala --id scala_2_11 --name "Scala (2.11)" --force \
+  && cd /tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}/ \
+  && sed -i 's/\(SCALA_VERSION=\)\([2-9]\.[0-9][0-9]*\.[0-9][0-9]*\)\(.*\)/\12.12.2\3/' jupyter-scala \
+  && ./jupyter-scala --id scala_2_12 --name "Scala (2.12)" --force \
+  && rm -r /tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}/ \
+  && rm -r /home/$NB_USER/.sbt/* \
+  && rm -r /home/$NB_USER/.ivy2/* \
+  && rm -r /home/$NB_USER/.ivy2/.sbt* \
+  && rm -r /home/$NB_USER/.coursier/*
+
+WORKDIR /home/$NB_USER/work
