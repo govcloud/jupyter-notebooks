@@ -17,7 +17,7 @@
 # under the License.
 #
 
-FROM jupyter/scipy-notebook:2bfbb7d17524
+FROM jupyter/tensorflow-notebook:2bfbb7d17524
 LABEL maintainer="William Hearn <william.hearn@canada.ca>"
 LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
 
