@@ -17,9 +17,26 @@
 # under the License.
 #
 
-FROM sas4c.azurecr.io/sas4c:9.4-studio
+FROM jupyter/minimal-notebook:2bfbb7d17524
 LABEL maintainer="William Hearn <william.hearn@canada.ca>"
 LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
 
-ENTRYPOINT ["/bin/bash"]
-CMD ["/studio.sh"]
+ENV SASPY_VERSION="2.2.4"
+
+USER root
+
+RUN pip install sas_kernel && \
+    mkdir /opt/sasinside/
+
+COPY conf/sascfg.py /opt/conda/lib/python3.6/site-packages/saspy/sascfg.py
+COPY conf/SASDeploymentManager/ /opt/sasinside/SASHome/SASDeploymentManager/
+
+RUN chown -R $NB_USER:$NB_GID /opt/sasinside/
+
+RUN jupyter nbextension install --py sas_kernel.showSASLog && \
+    jupyter nbextension enable sas_kernel.showSASLog --py && \
+    jupyter nbextension install --py sas_kernel.theme && \
+    jupyter nbextension enable sas_kernel.theme --py && \
+    jupyter nbextension list
+
+USER $NB_USER
