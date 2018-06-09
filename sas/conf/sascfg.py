@@ -126,7 +126,7 @@ cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__944
 cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/saspyiom.jar"
 
 iomlinux = {'java'      : '/usr/bin/java',
-            'iomhost'   : 'localhost',
+            'iomhost'   : 'sas4c-sas4c',
             'iomport'   : 38591,
             'encoding'  : 'utf8',
             'classpath' : cpL,
