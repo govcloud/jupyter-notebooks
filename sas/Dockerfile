@@ -26,7 +26,8 @@ ENV SASPY_VERSION="2.2.4"
 USER root
 
 RUN pip install sas_kernel \
-                azure-storage && \
+                azure-storage
+                pandas && \
     mkdir /opt/sasinside/
 
 COPY conf/sascfg.py /opt/conda/lib/python3.6/site-packages/saspy/sascfg.py
