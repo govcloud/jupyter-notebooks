@@ -24,6 +24,10 @@ ENV _VERSION="0.3.0"
 
 USER root
 
-RUN pip install ipystata
+RUN pip install ipystata pandas ipython
+
+COPY files.py /etc/jupyter/
+
+# RUN ipython files.py
 
 USER $NB_USER
