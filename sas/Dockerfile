@@ -65,8 +65,8 @@ RUN apt-get update \
     /var/lib/cache \
     /var/lib/log
 
-USER $NB_USER
-
 COPY conf/docs/ /home/$NB_USER/docs/
 
-RUN fix-permissions /home/$NB_USER
+RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/
+
+USER $NB_USER
