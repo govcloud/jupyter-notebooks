@@ -16,20 +16,22 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM jupyter/minimal-notebook:2bfbb7d17524
+
+FROM jupyter/scipy-notebook:2bfbb7d17524
 LABEL maintainer="William Hearn <william.hearn@canada.ca>"
 LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
 
-ENV _VERSION="0.3.0"
-
-USER root
-
-RUN pip install ipystata \
-                pandas \
-                ipython
-
-COPY files.py /etc/jupyter/
-
-# RUN ipython files.py
-
 USER $NB_USER
+
+# Python extra packages
+RUN conda install --quiet --yes -c conda-forge \
+    'arrow-cpp=0.9.*' \
+    'pyarrow=0.9.*' \
+    numpy \
+    pytables \
+    readline && \
+    conda clean -tipsy && \
+    fix-permissions $CONDA_DIR
+
+# Pachyderm Client
+RUN pip install python-pachyderm

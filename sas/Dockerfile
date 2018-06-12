@@ -68,3 +68,5 @@ RUN apt-get update \
 USER $NB_USER
 
 COPY conf/docs/ /home/$NB_USER/docs/
+
+RUN fix-permissions /home/$NB_USER/docs/
