@@ -41,7 +41,7 @@ RUN jupyter nbextension install --py sas_kernel.showSASLog && \
     jupyter nbextension enable sas_kernel.theme --py && \
     jupyter nbextension list
 
-# java9 install
+# java 10 install
 RUN apt-get update \
   && apt-get -y install software-properties-common python-software-properties \
   && add-apt-repository ppa:linuxuprising/java \
@@ -66,3 +66,5 @@ RUN apt-get update \
     /var/lib/log
 
 USER $NB_USER
+
+COPY conf/docs/ /home/$NB_USER/docs/
