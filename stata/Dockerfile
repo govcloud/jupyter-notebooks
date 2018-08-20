@@ -47,6 +47,19 @@ RUN cd /usr/local/ && \
     tar -xpf stata15.tar && \
     rm stata15.tar
 
+# blobfuse
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends uuid-dev libgcrypt11-dev golang-go build-essential zlib1g-dev fuse gnutls-dev libcurl3-gnutls libgnutls30 pkg-config libfuse-dev cmake libcurl4-openssl-dev \
+    && git clone https://github.com/Azure/azure-storage-fuse \
+    && cd azure-storage-fuse \
+    && ./build.sh \
+    && mv build/blobfuse /usr/local/bin \
+    && cd .. \
+    && rm -rf azure-storage-fuse/ \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY scripts/mnt-blobfuse.sh /usr/local/bin/
+
 COPY conf/docs/ /home/$NB_USER/docs/
 
 RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/

@@ -76,10 +76,9 @@ RUN apt-get update \
     && rm -rf azure-storage-fuse/ \
     && rm -rf /var/lib/apt/lists/*
 
-COPY conf/docs/ /home/$NB_USER/docs/
-
-# Overrride defaults
 COPY scripts/mnt-blobfuse.sh /usr/local/bin/
+
+COPY conf/docs/ /home/$NB_USER/docs/
 
 RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/
 
