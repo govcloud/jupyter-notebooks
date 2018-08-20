@@ -60,11 +60,11 @@ COPY scripts/mnt-blobfuse.sh /usr/local/bin/
 
 USER $NB_USER
 
-RUN curl -sL --retry 5 "https://github.com/jupyter-scala/jupyter-scala/archive/v${JUPYTER_SCALA_VERSION}.tar.gz" \
+RUN curl -sL --retry 5 "https://github.com/jupyter-scala/jupyter-scala/archive/jupyter-scala-v${JUPYTER_SCALA_VERSION}.tar.gz" \
   | gunzip \
   | tar -x -C "/tmp/"
 
-RUN cd "/tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}" && \
+RUN cd "/tmp/jupyter-scala-jupyter-scala-v${JUPYTER_SCALA_VERSION}" && \
   /opt/sbt-${SBT_VERSION}/bin/sbt ++2.11.11 ++2.12.2 publishLocal \
   && cd /tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}/ \
   && ./jupyter-scala --id scala_2_11 --name "Scala (2.11)" --force \
