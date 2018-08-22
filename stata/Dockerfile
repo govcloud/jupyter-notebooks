@@ -1,21 +1,3 @@
-
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements. See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership. The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License. You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations
-# under the License.
-#
 FROM jupyter/minimal-notebook:2bfbb7d17524
 LABEL maintainer="William Hearn <william.hearn@canada.ca>"
 LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
@@ -30,10 +12,17 @@ ENV ACCOUNT_KEY=${AZURE_ACCOUNT_KEY}
 
 USER root
 
+# apt-get and system utilities
+RUN apt-get update && apt-get install -y \
+    curl apt-transport-https debconf-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Initial deps
 RUN pip install ipystata \
                 pandas \
                 ipython
 
+# Blobporter
 RUN apt-get update && apt-get install -y curl \
                                          ghostscript && \
     curl -L https://github.com/Azure/blobporter/releases/download/v0.6.12/bp_linux.tar.gz -o /tmp/blobporter.tar.gz && \
@@ -47,23 +36,45 @@ RUN cd /usr/local/ && \
     tar -xpf stata15.tar && \
     rm stata15.tar
 
-# blobfuse
+# Blobfuse
+ENV BUILD_DEPS="uuid-dev \
+                libgcrypt11-dev \
+                golang-go \
+                build-essential \
+                zlib1g-dev \
+                fuse \
+                pkg-config \
+                libfuse-dev \
+                cmake "
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends uuid-dev libgcrypt11-dev golang-go build-essential zlib1g-dev fuse gnutls-dev libcurl3-gnutls libgnutls30 pkg-config libfuse-dev cmake libcurl4-openssl-dev \
+    && apt-get install -y --no-install-recommends $BUILD_DEPS gnutls-dev libgnutls30 libcurl3-gnutls libcurl4-openssl-dev \
     && git clone https://github.com/Azure/azure-storage-fuse \
     && cd azure-storage-fuse \
     && ./build.sh \
     && mv build/blobfuse /usr/local/bin \
     && cd .. \
     && rm -rf azure-storage-fuse/ \
+    && apt-get purge -y --auto-remove $BUILD_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
 COPY scripts/mnt-blobfuse.sh /usr/local/bin/
 
+# Documentation
 COPY conf/docs/ /home/$NB_USER/docs/
 
 RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/
+
+# Prettier graph export
 #    sed -i 's/graph export "%s"/graphexportpdf %s/g' /opt/conda/lib/python3.6/site-packages/ipystata/ipystata_magic_batch.py
+
+# custom MS repository
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+
+# SQL Server drivers
+RUN  apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql mssql-tools && \
+    echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
+    /bin/bash -c "source ~/.bashrc"
 
 USER $NB_USER
 
@@ -74,7 +85,6 @@ RUN stata ssc install graphexportpdf
 
 # syntax highlighting
 # RUN mkdir -p /opt/conda/lib/python3.6/site-packages/notebook/static/components/codemirror/mode/stata
-
 # COPY conf/stata.js /opt/conda/lib/python3.6/site-packages/notebook/static/components/codemirror/mode/stata/
 
 COPY files.py /etc/jupyter/
