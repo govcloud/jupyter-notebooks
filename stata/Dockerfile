@@ -47,7 +47,10 @@ ENV BUILD_DEPS="uuid-dev \
                 libfuse-dev \
                 cmake "
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends $BUILD_DEPS gnutls-dev libgnutls30 libcurl3-gnutls libcurl4-openssl-dev \
+    && apt-get install -y --no-install-recommends $BUILD_DEPS gnutls-dev \
+                                                              libgnutls30 \
+                                                              libcurl3-gnutls \
+                                                              libcurl4-openssl-dev \
     && git clone https://github.com/Azure/azure-storage-fuse \
     && cd azure-storage-fuse \
     && ./build.sh \

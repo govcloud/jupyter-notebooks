@@ -4,15 +4,28 @@ LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
 
 USER root
 
-# blobfuse
+# Blobfuse
+ENV BUILD_DEPS="uuid-dev \
+                libgcrypt11-dev \
+                golang-go \
+                build-essential \
+                zlib1g-dev \
+                fuse \
+                pkg-config \
+                libfuse-dev \
+                cmake "
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends uuid-dev libgcrypt11-dev golang-go build-essential zlib1g-dev fuse gnutls-dev libcurl3-gnutls libgnutls30 pkg-config libfuse-dev cmake libcurl4-openssl-dev \
+    && apt-get install -y --no-install-recommends $BUILD_DEPS gnutls-dev \
+                                                              libgnutls30 \
+                                                              libcurl3-gnutls \
+                                                              libcurl4-openssl-dev \
     && git clone https://github.com/Azure/azure-storage-fuse \
     && cd azure-storage-fuse \
     && ./build.sh \
     && mv build/blobfuse /usr/local/bin \
     && cd .. \
     && rm -rf azure-storage-fuse/ \
+    && apt-get purge -y --auto-remove $BUILD_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
 COPY scripts/mnt-blobfuse.sh /usr/local/bin/
