@@ -76,4 +76,13 @@ COPY conf/docs/ /home/$NB_USER/docs/
 
 RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/
 
+# custom MS repository
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+
+# SQL Server drivers
+RUN  apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql mssql-tools && \
+    echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
+    /bin/bash -c "source ~/.bashrc"
+
 USER $NB_USER
