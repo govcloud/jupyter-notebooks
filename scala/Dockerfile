@@ -60,12 +60,12 @@ RUN curl -sL --retry 5 "https://github.com/jupyter-scala/jupyter-scala/archive/j
 
 RUN cd "/tmp/jupyter-scala-jupyter-scala-v${JUPYTER_SCALA_VERSION}" && \
   /opt/sbt-${SBT_VERSION}/bin/sbt ++2.11.11 ++2.12.2 publishLocal \
-  && cd /tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}/ \
+  && cd /tmp/jupyter-scala-jupyter-scala-v${JUPYTER_SCALA_VERSION}/ \
   && ./jupyter-scala --id scala_2_11 --name "Scala (2.11)" --force \
-  && cd /tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}/ \
+  && cd /tmp/jupyter-scala-jupyter-scala-v${JUPYTER_SCALA_VERSION}/ \
   && sed -i 's/\(SCALA_VERSION=\)\([2-9]\.[0-9][0-9]*\.[0-9][0-9]*\)\(.*\)/\12.12.2\3/' jupyter-scala \
   && ./jupyter-scala --id scala_2_12 --name "Scala (2.12)" --force \
-  && rm -r /tmp/jupyter-scala-${JUPYTER_SCALA_VERSION}/ \
+  && rm -r /tmp/jupyter-scala-jupyter-scala-v${JUPYTER_SCALA_VERSION}/ \
   && rm -r /home/$NB_USER/.sbt/* \
   && rm -r /home/$NB_USER/.ivy2/* \
   && rm -r /home/$NB_USER/.ivy2/.sbt* \
