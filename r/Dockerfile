@@ -35,6 +35,7 @@ USER $NB_UID
 
 # R extra packages
 RUN conda install --quiet --yes \
+    'libuuid' \
     'r-latticeExtra=0.6*' \
     'r-gdata=2.18.*' \
     'r-data.table=1.11.*' && \

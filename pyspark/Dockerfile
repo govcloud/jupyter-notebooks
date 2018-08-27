@@ -36,6 +36,7 @@ USER $NB_USER
 # Python extra packages
 RUN conda install --quiet --yes -c conda-forge \
     'arrow-cpp=0.9.*' \
+    'libuuid' \
     'pyarrow=0.9.*' \
     numpy \
     pytables \

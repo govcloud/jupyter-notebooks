@@ -35,6 +35,7 @@ USER $NB_UID
 
 # Python extra packages
 RUN conda install --quiet --yes \
+    'libuuid' \
     psycopg2 && \
     conda clean -tipsy && \
     fix-permissions $CONDA_DIR && \
