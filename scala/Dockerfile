@@ -32,12 +32,13 @@ ENV BUILD_DEPS="uuid-dev \
                 golang-go \
                 build-essential \
                 zlib1g-dev \
-                fuse \
                 pkg-config \
                 libfuse-dev \
-                cmake "
+                cmake"
+
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends $BUILD_DEPS gnutls-dev \
+    && apt-get install -y --no-install-recommends $BUILD_DEPS fuse \
+                                                              gnutls-dev \
                                                               libgnutls30 \
                                                               libcurl3-gnutls \
                                                               libcurl4-openssl-dev \
