@@ -30,8 +30,6 @@ RUN apt-get update \
 
 COPY scripts/mnt-blobfuse.sh /usr/local/bin/
 
-COPY scripts/mnt-blobfuse.sh /usr/local/bin/
-
 USER $NB_UID
 
 # Python extra packages
