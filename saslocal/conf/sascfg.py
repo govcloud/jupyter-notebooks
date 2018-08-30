@@ -31,7 +31,7 @@
 #SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
 #
 
-SAS_config_names=['iomlinux']
+SAS_config_names=['default']
 
 # Configuration options for saspy - python Dict
 # valid key are:
@@ -77,7 +77,7 @@ SAS_output_options = {'output' : 'html5'}
 # 'port'    - [integer] the remote ssh port
 # 'tunnel'  - [integer] local port to open via reverse tunnel, if remote host cannot otherwise reach this client
 #
-default  = {'saspath'  : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
+default  = {'saspath'  : '/usr/local/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
 
 ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',

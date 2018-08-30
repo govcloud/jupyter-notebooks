@@ -6,6 +6,11 @@ ENV SASPY_VERSION="2.2.4"
 
 USER root
 
+# apt-get and system utilities
+RUN apt-get update && apt-get install -y \
+    curl apt-transport-https debconf-utils \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN pip install sas_kernel \
                 azure-storage \
                 pandas && \

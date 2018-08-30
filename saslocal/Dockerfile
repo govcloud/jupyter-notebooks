@@ -14,7 +14,12 @@ USER root
 
 # apt-get and system utilities
 RUN apt-get update && apt-get install -y \
-    curl apt-transport-https debconf-utils \
+    curl \
+    apt-transport-https \
+    debconf-utils \
+    libnuma-dev \
+    libmagic-dev \
+    libjpeg62 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install sas_kernel \
