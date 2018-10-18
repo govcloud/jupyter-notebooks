@@ -32,9 +32,9 @@ RUN apt-get update && apt-get install -y curl \
     chmod a+x /usr/local/bin/blobporter
 
 RUN cd /usr/local/ && \
-    blobporter -c stata -n stata15.tar -t blob-file && \
-    tar -xpf stata15.tar && \
-    rm stata15.tar
+    blobporter -c stata -n stata15-v3.tgz -t blob-file && \
+    tar -xzpf stata15-v3.tgz && \
+    rm stata15-v3.tgz
 
 # Blobfuse
 ENV BUILD_DEPS="uuid-dev \
@@ -74,15 +74,16 @@ RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/
 # custom MS repository
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+RUN curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list
 
 # SQL Server drivers
-RUN  apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql mssql-tools && \
+RUN apt-get update && ACCEPT_EULA=Y apt-get install -y dbus msodbcsql mssql-server mssql-tools && \
     echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
     /bin/bash -c "source ~/.bashrc"
 
 USER $NB_USER
 
-ENV PATH=$PATH:/usr/local/stata15
+ENV PATH=$PATH:/usr/local/stata
 
 # https://ideas.repec.org/c/boc/bocode/s457036.html
 RUN stata ssc install graphexportpdf
