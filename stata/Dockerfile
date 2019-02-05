@@ -32,9 +32,9 @@ RUN apt-get update && apt-get install -y curl \
     chmod a+x /usr/local/bin/blobporter
 
 RUN cd /usr/local/ && \
-    blobporter -c stata -n stata15-v3.tgz -t blob-file && \
-    tar -xzpf stata15-v3.tgz && \
-    rm stata15-v3.tgz
+    blobporter -c stata -n stata15yr.tgz -t blob-file && \
+    tar -xzpf stata15yr.tgz && \
+    rm stata15yr.tgz
 
 # Blobfuse
 ENV BUILD_DEPS="uuid-dev \

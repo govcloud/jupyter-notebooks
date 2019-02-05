@@ -5,7 +5,7 @@ IFS=$'\n\t'
 
 export AZURE_MOUNT_POINT=/home/$NB_USER/wasb
 
-# mount our blobstore
+# Mount blobstore
 test ${AZURE_MOUNT_POINT}
 rm -rf ${AZURE_MOUNT_POINT}
 mkdir -p ${AZURE_MOUNT_POINT}
