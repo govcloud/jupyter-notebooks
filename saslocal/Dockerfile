@@ -1,4 +1,4 @@
-FROM jupyter/minimal-notebook:2bfbb7d17524
+FROM jupyter/minimal-notebook:d4cbf2f80a2a
 LABEL maintainer="William Hearn <william.hearn@canada.ca>"
 LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
 
@@ -8,19 +8,20 @@ ENV ACCOUNT_NAME=${AZURE_ACCOUNT_NAME}
 ARG AZURE_ACCOUNT_KEY
 ENV ACCOUNT_KEY=${AZURE_ACCOUNT_KEY}
 
+# SAS
+
 ENV SASPY_VERSION="2.2.4"
 
 USER root
 
-# apt-get and system utilities
-RUN apt-get update && apt-get install -y \
-    curl \
-    apt-transport-https \
-    debconf-utils \
-    libnuma-dev \
-    libmagic-dev \
-    libjpeg62 \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y curl \
+                       apt-transport-https \
+                       debconf-utils \
+                       libnuma-dev \
+                       libmagic-dev \
+                       libjpeg62 && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip install sas_kernel \
                 azure-storage \
@@ -38,31 +39,16 @@ RUN jupyter nbextension install --py sas_kernel.showSASLog && \
     jupyter nbextension enable sas_kernel.theme --py && \
     jupyter nbextension list
 
-# java 10 install
-RUN apt-get update \
-  && apt-get -y install software-properties-common python-software-properties \
-  && add-apt-repository ppa:linuxuprising/java \
-  && apt-get update && \
-  echo oracle-java10-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections \
-  && apt-get -y install oracle-java10-installer \
-  && apt-get -y remove software-properties-common \
-  && apt-get clean autoclean -y \
-  && apt-get autoremove -y \
-  && rm -rf /var/lib/apt \
-    /var/lib/dpkg/arch \
-    /var/lib/dpkg/available \
-    /var/lib/dpkg/cmethopt \
-    /var/lib/dpkg/diversions \
-    /var/lib/dpkg/diversions-old \
-    /var/lib/dpkg/lock \
-    /var/lib/dpkg/parts \
-    /var/lib/dpkg/statoverride \
-    /var/lib/dpkg/status-old \
-    /var/lib/dpkg/triggers \
-    /var/lib/cache \
-    /var/lib/log
+RUN apt-get update && \
+    apt-get -y install software-properties-common && \
+    add-apt-repository ppa:linuxuprising/java && \
+    apt-get update && \
+    echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | /usr/bin/debconf-set-selections && \
+    apt-get -y install oracle-java11-installer && \
+    apt-get -y remove software-properties-common && \
+    apt-get clean autoclean -y && \
+    apt-get autoremove -y
 
-# SAS
 RUN useradd -m sas && \
     groupadd -g 1002 sasstaff && \
     usermod -a -G sasstaff sas && \
@@ -76,24 +62,26 @@ RUN curl -L https://github.com/Azure/blobporter/releases/download/v0.6.12/bp_lin
 
 ADD scripts/* /
 
-RUN cd /usr/local/ && \
+RUN apt-get -y install bsdtar && \
+    cd /usr/local/ && \
     blobporter -c sas -n SASHome.tgz -t blob-file && \
-    tar -xzpf SASHome.tgz && \
+    bsdtar -xzpf SASHome.tgz && \
     rm SASHome.tgz && \
     chown -R sas:sasstaff /usr/local/SASHome && \
-    ln -s /usr/local/SASHome/SASFoundation/9.4/bin/sas_en /usr/local/bin/sas
+    ln -s /usr/local/SASHome/SASFoundationServices/9.4/bin/sas_en /usr/local/bin/sas
 
-# WORKDIR /home/sas
+RUN cat /usr/local/SASHome/licenses/SAS94_9C62GW_70252644_Win_X64_Srv.txt
 
-ENV PATH=$PATH:/usr/local/SASHome/SASFoundation/9.4/bin
+ENV PATH=$PATH:/usr/local/SASHome/SASFoundationServices/9.4/bin
 
 ENV PATH=$PATH:/usr/local/SASHome/SASPrivateJavaRuntimeEnvironment/9.4/jre/bin
 
 EXPOSE 8561 8591 38080
 
-RUN /usr/local/SASHome/SASFoundation/9.4/utilities/bin/setuid.sh
+RUN /usr/local/SASHome/SASFoundationServices/9.4/utilities/bin/setuid.sh
 
-# Blobfuse
+# BLOB FUSE
+
 ENV BUILD_DEPS="uuid-dev \
                 libgcrypt11-dev \
                 golang-go \
@@ -124,21 +112,23 @@ COPY conf/docs/ /home/$NB_USER/docs/
 
 RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/
 
-# custom MS repository
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
-RUN curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list
+# SQL Server
 
-# SQL Server drivers
-RUN apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql mssql-server mssql-tools && \
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list
+
+RUN apt-get update && \
+    ACCEPT_EULA=Y && \
+    apt-get install -y msodbcsql \
+                       mssql-server \
+                      mssql-tools && \
     echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
     /bin/bash -c "source ~/.bashrc"
 
-# Configure container startup
+# Container Startup
+
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["start-notebook.sh"]
-
-# Add local files as late as possible to avoid cache busting
 COPY scripts/start-notebook.sh /usr/local/bin/
-
 USER $NB_USER
