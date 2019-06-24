@@ -1,15 +1,21 @@
-FROM jupyter/minimal-notebook:2bfbb7d17524
+FROM jupyter/minimal-notebook:d4cbf2f80a2a
 LABEL maintainer="William Hearn <william.hearn@canada.ca>"
 LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
 
-ENV SASPY_VERSION="2.2.4"
-
 USER root
 
-# apt-get and system utilities
-RUN apt-get update && apt-get install -y \
-    curl apt-transport-https debconf-utils \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y curl \
+                       apt-transport-https \
+                       debconf-utils \
+                       libnuma-dev \
+                       libmagic-dev \
+                       libjpeg62 && \
+    rm -rf /var/lib/apt/lists/*
+
+# SASPY
+
+ENV SASPY_VERSION="3.1.0"
 
 RUN pip install sas_kernel \
                 azure-storage \
@@ -27,31 +33,8 @@ RUN jupyter nbextension install --py sas_kernel.showSASLog && \
     jupyter nbextension enable sas_kernel.theme --py && \
     jupyter nbextension list
 
-# java 10 install
-RUN apt-get update \
-  && apt-get -y install software-properties-common python-software-properties \
-  && add-apt-repository ppa:linuxuprising/java \
-  && apt-get update && \
-  echo oracle-java10-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections \
-  && apt-get -y install oracle-java10-installer \
-  && apt-get -y remove software-properties-common \
-  && apt-get clean autoclean -y \
-  && apt-get autoremove -y \
-  && rm -rf /var/lib/apt \
-    /var/lib/dpkg/arch \
-    /var/lib/dpkg/available \
-    /var/lib/dpkg/cmethopt \
-    /var/lib/dpkg/diversions \
-    /var/lib/dpkg/diversions-old \
-    /var/lib/dpkg/lock \
-    /var/lib/dpkg/parts \
-    /var/lib/dpkg/statoverride \
-    /var/lib/dpkg/status-old \
-    /var/lib/dpkg/triggers \
-    /var/lib/cache \
-    /var/lib/log
+# BLOB FUSE
 
-# Blobfuse
 ENV BUILD_DEPS="uuid-dev \
                 libgcrypt11-dev \
                 golang-go \
@@ -82,13 +65,26 @@ COPY conf/docs/ /home/$NB_USER/docs/
 
 RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/
 
-# custom MS repository
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-RUN curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+# SQL Server
 
-# SQL Server drivers
-RUN  apt-get update && ACCEPT_EULA=Y apt-get install -y msodbcsql mssql-tools && \
+RUN apt-get update && \
+    apt-get install -y gnupg && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list
+
+RUN apt-get update && \
+    apt-get install -y libcurl3 && \
+    ACCEPT_EULA=Y \
+    apt-get install -y msodbcsql \
+                       mssql-server \
+                       mssql-tools && \
     echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
     /bin/bash -c "source ~/.bashrc"
 
+# Startup
+
+ENTRYPOINT ["tini", "-g", "--"]
+CMD ["start-notebook.sh"]
+COPY scripts/start-notebook.sh /usr/local/bin/
 USER $NB_USER

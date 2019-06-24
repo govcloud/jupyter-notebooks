@@ -1,16 +1,10 @@
+FROM statcan.azurecr.io/sas4c:9.4 as SASHome
+LABEL maintainer "William Hearn <william.hearn@canada.ca>"
+LABEL site="https://www.sas.com"
+
 FROM jupyter/minimal-notebook:d4cbf2f80a2a
 LABEL maintainer="William Hearn <william.hearn@canada.ca>"
 LABEL site="https://jupyterhub.readthedocs.io/en/stable/"
-
-ARG AZURE_ACCOUNT_NAME=jupyter
-ENV ACCOUNT_NAME=${AZURE_ACCOUNT_NAME}
-
-ARG AZURE_ACCOUNT_KEY
-ENV ACCOUNT_KEY=${AZURE_ACCOUNT_KEY}
-
-# SAS
-
-ENV SASPY_VERSION="2.2.4"
 
 USER root
 
@@ -22,6 +16,10 @@ RUN apt-get update && \
                        libmagic-dev \
                        libjpeg62 && \
     rm -rf /var/lib/apt/lists/*
+
+# SASPY
+
+ENV SASPY_VERSION="3.1.0"
 
 RUN pip install sas_kernel \
                 azure-storage \
@@ -49,36 +47,31 @@ RUN apt-get update && \
     apt-get clean autoclean -y && \
     apt-get autoremove -y
 
+## SAS
+
 RUN useradd -m sas && \
     groupadd -g 1002 sasstaff && \
     usermod -a -G sasstaff sas && \
     echo "sas:sas" | chpasswd
 
-RUN curl -L https://github.com/Azure/blobporter/releases/download/v0.6.12/bp_linux.tar.gz -o /tmp/blobporter.tar.gz && \
-    tar -xf /tmp/blobporter.tar.gz -C /tmp linux_amd64/blobporter && \
-    mv /tmp/linux_amd64/blobporter /usr/local/bin/blobporter && \
-    rm -rf /tmp/* && \
-    chmod a+x /usr/local/bin/blobporter
+COPY --from=SASHome /usr/local/SASHome /usr/local/SASHome
+
+RUN chown -R sas:sasstaff /usr/local/SASHome && \
+    ln -s /usr/local/SASHome/SASFoundationServices/9.4/bin/sas_en /usr/local/bin/sas
 
 ADD scripts/* /
 
-RUN apt-get -y install bsdtar && \
-    cd /usr/local/ && \
-    blobporter -c sas -n SASHome.tgz -t blob-file && \
-    bsdtar -xzpf SASHome.tgz && \
-    rm SASHome.tgz && \
-    chown -R sas:sasstaff /usr/local/SASHome && \
-    ln -s /usr/local/SASHome/SASFoundationServices/9.4/bin/sas_en /usr/local/bin/sas
+WORKDIR /home/sas
 
-RUN cat /usr/local/SASHome/licenses/SAS94_9C62GW_70252644_Win_X64_Srv.txt
-
-ENV PATH=$PATH:/usr/local/SASHome/SASFoundationServices/9.4/bin
+ENV PATH=$PATH:/usr/local/SASHome/SASFoundation/9.4/bin
 
 ENV PATH=$PATH:/usr/local/SASHome/SASPrivateJavaRuntimeEnvironment/9.4/jre/bin
 
-EXPOSE 8561 8591 38080
+RUN /usr/local/SASHome/SASFoundation/9.4/utilities/bin/setuid.sh
 
-RUN /usr/local/SASHome/SASFoundationServices/9.4/utilities/bin/setuid.sh
+ENV SAS_HADOOP_JAR_PATH=/opt/hadoop
+
+EXPOSE 8561 8591 38080
 
 # BLOB FUSE
 
@@ -114,19 +107,22 @@ RUN chown -R $NB_USER:$NB_GID /home/$NB_USER/docs/
 
 # SQL Server
 
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+RUN apt-get update && \
+    apt-get install -y gnupg && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
     curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list
 
 RUN apt-get update && \
-    ACCEPT_EULA=Y && \
+    apt-get install -y libcurl3 && \
+    ACCEPT_EULA=Y \
     apt-get install -y msodbcsql \
                        mssql-server \
-                      mssql-tools && \
+                       mssql-tools && \
     echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
     /bin/bash -c "source ~/.bashrc"
 
-# Container Startup
+# Startup
 
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["start-notebook.sh"]
