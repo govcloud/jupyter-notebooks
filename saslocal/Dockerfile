@@ -42,7 +42,7 @@ RUN apt-get update && \
     add-apt-repository ppa:linuxuprising/java && \
     apt-get update && \
     echo oracle-java11-installer shared/accepted-oracle-license-v1-2 select true | /usr/bin/debconf-set-selections && \
-    apt-get -y install oracle-java11-installer && \
+    apt-get -y install oracle-java12-installer && \
     apt-get -y remove software-properties-common && \
     apt-get clean autoclean -y && \
     apt-get autoremove -y
