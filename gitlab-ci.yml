@@ -1,0 +1,311 @@
+include:
+  remote: 'https://gitlab.k8s.cloud.statcan.ca/cloudnative/gitlab/gitlabci/docker/raw/v1.0.0/.docker.gitlab-ci.yml'
+
+stages:
+  - lint
+  - build
+  - tag
+
+#Pachyderm
+docker lint:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./pachyderm/Dockerfile
+
+docker build:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint
+  variables:
+    DOCKERFILE: ./pachyderm/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pachyderm-notebook
+
+docker build and push:
+  extends: .docker-build-push
+  stage: build
+  dependencies:
+    - docker lint
+  variables:
+    DOCKERFILE: ./pachyderm/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pachyderm-notebook
+
+docker tag:
+  extends: .docker-tag
+  stage: tag
+  dependencies:
+    - docker build and push
+  variables:
+    DOCKERFILE: ./pachyderm/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pachyderm-notebook
+
+#pyspark
+docker lint pyspark:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./pyspark/Dockerfile
+
+docker build pyspark:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint pyspark
+  variables:
+    DOCKERFILE: ./pyspark/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pyspark-notebook
+
+docker build and push pyspark:
+  extends: .docker-build-push
+  stage: build
+  dependencies:
+    - docker lint pyspark
+  variables:
+    DOCKERFILE: ./pyspark/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pyspark-notebook
+
+docker tag pyspark:
+  extends: .docker-tag
+  stage: tag
+  dependencies:
+    - docker build and push pyspark
+  variables:
+    DOCKERFILE: ./pyspark/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pyspark-notebook
+
+#r
+docker lint r:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./r/Dockerfile
+
+docker build r:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint r
+  variables:
+    DOCKERFILE: ./r/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/r-notebook
+
+docker build and push r:
+  extends: .docker-build-push
+  stage: build
+  variables:
+    DOCKERFILE: ./r/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/r-notebook
+
+docker tag r:
+  extends: .docker-tag
+  stage: tag
+  dependencies:
+    - docker build and push r
+  variables:
+    DOCKERFILE: ./r/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/r-notebook
+
+#sas
+docker lint sas:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./sas/Dockerfile
+
+docker build sas:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint sas
+  variables:
+    DOCKERFILE: ./sas/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/sas-notebook
+
+docker build and push sas:
+  extends: .docker-build-push
+  stage: build
+  dependencies:
+    - docker lint sas
+  variables:
+    DOCKERFILE: ./sas/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/sas-notebook
+
+docker tag sas:
+  extends: .docker-tag
+  stage: tag
+  dependencies:
+    - docker build and push sas
+  variables:
+    DOCKERFILE: ./sas/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/sas-notebook
+
+#saslocal
+docker lint saslocal:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./saslocal/Dockerfile
+
+docker build saslocal:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint saslocal
+  variables:
+    DOCKERFILE: ./saslocal/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/saslocal-notebook
+
+docker build and push saslocal:
+  extends: .docker-build-push
+  stage: build
+  dependencies:
+    - docker lint saslocal
+  variables:
+    DOCKERFILE: ./saslocal/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/saslocal-notebook
+
+docker tag saslocal:
+  extends: .docker-tag
+  stage: tag
+  dependencies:
+    - docker build and push saslocal
+  variables:
+    DOCKERFILE: ./saslocal/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/saslocal-notebook
+
+#scala
+docker lint scala:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./scala/Dockerfile
+
+docker build scala:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint scala
+  variables:
+    DOCKERFILE: ./scala/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scala-notebook
+
+docker build and push scala:
+  extends: .docker-build-push
+  stage: build
+  dependencies:
+    - docker lint scala
+  variables:
+    DOCKERFILE: ./scala/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scala-notebook
+
+docker tag scala:
+  extends: .docker-tag
+  stage: tag
+  dependencies:
+    - docker build and push scala
+  variables:
+    DOCKERFILE: ./scala/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scala-notebook
+
+#scipy
+docker lint scipy:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./scipy/Dockerfile
+
+docker build scipy:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint scipy
+  variables:
+    DOCKERFILE: ./scipy/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scipy-notebook
+
+docker build and push scipy:
+  extends: .docker-build-push
+  stage: build
+  dependencies:
+    - docker lint scipy
+  variables:
+    DOCKERFILE: ./scipy/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scipy-notebook
+
+docker tag scipy:
+  extends: .docker-tag
+  stage: tag
+  dependencies:
+    - docker build and push scipy
+  variables:
+    DOCKERFILE: ./scipy/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scipy-notebook
+
+#stata
+docker lint stata:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./stata/Dockerfile
+
+docker build stata:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint stata
+  variables:
+    DOCKERFILE: ./stata/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/stata-notebook
+
+docker build and push stata:
+  extends: .docker-build-push
+  stage: build
+  dependencies:
+    - docker lint stata
+  variables:
+    DOCKERFILE: ./stata/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/stata-notebook
+
+docker tag stata:
+  extends: .docker-tag
+  stage: tag
+  dependencies:
+    - docker build and push stata
+  variables:
+    DOCKERFILE: ./stata/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/stata-notebook
+
+#tensorflow
+docker lint tensorflow:
+  extends: .docker-lint
+  stage: lint
+  variables:
+    DOCKERFILE: ./tensorflow/Dockerfile
+
+docker build tensorflow:
+  extends: .docker-build
+  stage: build
+  dependencies:
+    - docker lint tensorflow
+  variables:
+    DOCKERFILE: ./tensorflow/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/tensorflow-notebook
+
+docker build and push tensorflow:
+  extends: .docker-build-push
+  stage: build
+  dependencies:
+    - docker lint tensorflow
+  variables:
+    DOCKERFILE: ./tensorflow/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/tensorflow-notebook
+
+docker tag tensorflow:
+  extends: .docker-tag
+  dependencies:
+    - docker build and push tensorflow
+  stage: tag
+  variables:
+    DOCKERFILE: ./tensorflow/Dockerfile
+    DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/tensorflow-notebook
