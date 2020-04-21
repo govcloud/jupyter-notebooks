@@ -21,15 +21,23 @@ docker build:
   variables:
     DOCKERFILE: ./pachyderm/Dockerfile
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pachyderm-notebook
+  except:
+    - master
+  only:
+    - branches
+ 
 
 docker build and push:
-  extends: .docker-build-push
+  extends: docker build-push
   stage: build
   dependencies:
     - docker lint
   variables:
     DOCKERFILE: ./pachyderm/Dockerfile
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pachyderm-notebook
+  only:
+    - tags
+    - master
 
 docker tag:
   extends: .docker-tag
@@ -48,7 +56,7 @@ docker lint pyspark:
     DOCKERFILE: ./pyspark/Dockerfile
 
 docker build pyspark:
-  extends: .docker-build
+  extends: docker build
   stage: build
   dependencies:
     - docker lint pyspark
@@ -57,7 +65,7 @@ docker build pyspark:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pyspark-notebook
 
 docker build and push pyspark:
-  extends: .docker-build-push
+  extends: docker build and push
   stage: build
   dependencies:
     - docker lint pyspark
@@ -82,7 +90,7 @@ docker lint r:
     DOCKERFILE: ./r/Dockerfile
 
 docker build r:
-  extends: .docker-build
+  extends: docker build
   stage: build
   dependencies:
     - docker lint r
@@ -91,7 +99,7 @@ docker build r:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/r-notebook
 
 docker build and push r:
-  extends: .docker-build-push
+  extends: docker build and push
   stage: build
   variables:
     DOCKERFILE: ./r/Dockerfile
@@ -114,7 +122,7 @@ docker lint sas:
     DOCKERFILE: ./sas/Dockerfile
 
 docker build sas:
-  extends: .docker-build
+  extends: docker build
   stage: build
   dependencies:
     - docker lint sas
@@ -123,7 +131,7 @@ docker build sas:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/sas-notebook
 
 docker build and push sas:
-  extends: .docker-build-push
+  extends: docker build and push
   stage: build
   dependencies:
     - docker lint sas
@@ -148,7 +156,7 @@ docker lint saslocal:
     DOCKERFILE: ./saslocal/Dockerfile
 
 docker build saslocal:
-  extends: .docker-build
+  extends: docker build
   stage: build
   dependencies:
     - docker lint saslocal
@@ -157,7 +165,7 @@ docker build saslocal:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/saslocal-notebook
 
 docker build and push saslocal:
-  extends: .docker-build-push
+  extends: docker build and push
   stage: build
   dependencies:
     - docker lint saslocal
@@ -182,7 +190,7 @@ docker lint scala:
     DOCKERFILE: ./scala/Dockerfile
 
 docker build scala:
-  extends: .docker-build
+  extends: docker build
   stage: build
   dependencies:
     - docker lint scala
@@ -191,7 +199,7 @@ docker build scala:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scala-notebook
 
 docker build and push scala:
-  extends: .docker-build-push
+  extends: docker build and push
   stage: build
   dependencies:
     - docker lint scala
@@ -216,7 +224,7 @@ docker lint scipy:
     DOCKERFILE: ./scipy/Dockerfile
 
 docker build scipy:
-  extends: .docker-build
+  extends: docker build
   stage: build
   dependencies:
     - docker lint scipy
@@ -225,7 +233,7 @@ docker build scipy:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scipy-notebook
 
 docker build and push scipy:
-  extends: .docker-build-push
+  extends: docker build and push
   stage: build
   dependencies:
     - docker lint scipy
@@ -250,7 +258,7 @@ docker lint stata:
     DOCKERFILE: ./stata/Dockerfile
 
 docker build stata:
-  extends: .docker-build
+  extends: docker build
   stage: build
   dependencies:
     - docker lint stata
@@ -259,7 +267,7 @@ docker build stata:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/stata-notebook
 
 docker build and push stata:
-  extends: .docker-build-push
+  extends: docker build and push
   stage: build
   dependencies:
     - docker lint stata
@@ -284,7 +292,7 @@ docker lint tensorflow:
     DOCKERFILE: ./tensorflow/Dockerfile
 
 docker build tensorflow:
-  extends: .docker-build
+  extends: docker build
   stage: build
   dependencies:
     - docker lint tensorflow
@@ -293,7 +301,7 @@ docker build tensorflow:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/tensorflow-notebook
 
 docker build and push tensorflow:
-  extends: .docker-build-push
+  extends: docker build and push
   stage: build
   dependencies:
     - docker lint tensorflow
