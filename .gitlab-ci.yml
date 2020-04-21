@@ -25,7 +25,6 @@ docker build:
     - master
   only:
     - branches
- 
 
 docker build and push:
   extends: .docker-build-push
@@ -47,6 +46,9 @@ docker tag:
   variables:
     DOCKERFILE: ./pachyderm/Dockerfile
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pachyderm-notebook
+  only:
+    - tags
+    - master
 
 #pyspark
 docker lint pyspark:
@@ -74,7 +76,7 @@ docker build and push pyspark:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/pyspark-notebook
 
 docker tag pyspark:
-  extends: .docker-tag
+  extends: docker tag
   stage: tag
   dependencies:
     - docker build and push pyspark
@@ -106,7 +108,7 @@ docker build and push r:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/r-notebook
 
 docker tag r:
-  extends: .docker-tag
+  extends: docker tag
   stage: tag
   dependencies:
     - docker build and push r
@@ -140,7 +142,7 @@ docker build and push sas:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/sas-notebook
 
 docker tag sas:
-  extends: .docker-tag
+  extends: docker tag
   stage: tag
   dependencies:
     - docker build and push sas
@@ -174,7 +176,7 @@ docker build and push saslocal:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/saslocal-notebook
 
 docker tag saslocal:
-  extends: .docker-tag
+  extends: docker tag
   stage: tag
   dependencies:
     - docker build and push saslocal
@@ -208,7 +210,7 @@ docker build and push scala:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scala-notebook
 
 docker tag scala:
-  extends: .docker-tag
+  extends: docker tag
   stage: tag
   dependencies:
     - docker build and push scala
@@ -242,7 +244,7 @@ docker build and push scipy:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/scipy-notebook
 
 docker tag scipy:
-  extends: .docker-tag
+  extends: docker tag
   stage: tag
   dependencies:
     - docker build and push scipy
@@ -276,7 +278,7 @@ docker build and push stata:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/stata-notebook
 
 docker tag stata:
-  extends: .docker-tag
+  extends: docker tag
   stage: tag
   dependencies:
     - docker build and push stata
@@ -310,7 +312,7 @@ docker build and push tensorflow:
     DOCKER_REPOSITORY: artifactory.cloud.statcan.ca/docker/jupyter/tensorflow-notebook
 
 docker tag tensorflow:
-  extends: .docker-tag
+  extends: docker tag
   dependencies:
     - docker build and push tensorflow
   stage: tag
