@@ -28,7 +28,7 @@ docker build:
  
 
 docker build and push:
-  extends: docker build-push
+  extends: .docker-build-push
   stage: build
   dependencies:
     - docker lint
