@@ -45,7 +45,8 @@ RUN apt-get update && \
     apt-get -y install oracle-java12-installer && \
     apt-get -y remove software-properties-common && \
     apt-get clean autoclean -y && \
-    apt-get autoremove -y
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
 
 ## SAS
 
@@ -111,7 +112,8 @@ RUN apt-get update && \
     apt-get install -y gnupg && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
-    curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list
+    curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
     apt-get install -y libcurl3 && \
@@ -120,7 +122,8 @@ RUN apt-get update && \
                        mssql-server \
                        mssql-tools && \
     echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
-    /bin/bash -c "source ~/.bashrc"
+    /bin/bash -c "source ~/.bashrc" && \
+    rm -rf /var/lib/apt/lists/*
 
 # Startup
 

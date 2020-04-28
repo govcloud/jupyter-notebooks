@@ -17,9 +17,9 @@ RUN apt-get update && \
 
 ENV SASPY_VERSION="3.1.0"
 
-RUN pip install sas_kernel \
-                azure-storage \
-                pandas && \
+RUN pip install --no-cache-dir sas_kernel \
+                               azure-storage \
+                               pandas && \
     mkdir /opt/sasinside/
 
 COPY conf/sascfg.py /opt/conda/lib/python3.6/site-packages/saspy/sascfg.py
@@ -71,7 +71,8 @@ RUN apt-get update && \
     apt-get install -y gnupg && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
-    curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list
+    curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server-2017.list > /etc/apt/sources.list.d/mssql-server.list && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
     apt-get install -y libcurl3 && \
@@ -80,7 +81,8 @@ RUN apt-get update && \
                        mssql-server \
                        mssql-tools && \
     echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc && \
-    /bin/bash -c "source ~/.bashrc"
+    /bin/bash -c "source ~/.bashrc" && \
+    rm -rf /var/lib/apt/lists/*
 
 # Startup
 
