@@ -45,4 +45,4 @@ RUN conda install --quiet --yes -c conda-forge \
     fix-permissions $CONDA_DIR
 
 # Pachyderm Client
-RUN pip install python-pachyderm
+RUN pip install --no-cache-dir python-pachyderm
