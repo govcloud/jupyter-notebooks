@@ -18,9 +18,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Initial deps
-RUN pip install ipystata \
-                pandas \
-                ipython
+RUN pip install --no-cache-dir ipystata \
+                               pandas \
+                               ipython
 
 # Blobporter
 RUN apt-get update && apt-get install -y curl \
@@ -29,7 +29,8 @@ RUN apt-get update && apt-get install -y curl \
     tar -xf /tmp/blobporter.tar.gz -C /tmp linux_amd64/blobporter && \
     mv /tmp/linux_amd64/blobporter /usr/local/bin/blobporter && \
     rm -rf /tmp/* && \
-    chmod a+x /usr/local/bin/blobporter
+    chmod a+x /usr/local/bin/blobporter && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN cd /usr/local/ && \
     blobporter -c stata -n stata15yr.tgz -t blob-file && \
